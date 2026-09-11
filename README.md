@@ -32,3 +32,9 @@ Each skill folder contains a `SKILL.md` (the definition your agent reads) plus a
 ## License
 
 MIT
+
+## Channels
+
+- Tencent SkillHub: published as free skills
+- ModelScope (Alibaba): https://modelscope.cn/skills/ly5419495
+- ClawHub: coming soon
