@@ -20,6 +20,10 @@ OpenClaw / ClawHub, and other SKILL.md-compatible agents.
 | `novel-deai-detector` | Detects "AI-flavoured" Chinese web-novel text and rewrites it the way a human would |
 | `cn-pdf-report-typeset` | Typesets Chinese reports (Word to PDF) with report-grade layout |
 | `financial-statement-adjustment` | Adjusts and cross-checks the three financial statements |
+| `investment-finance` | Investment & financing playbook — Valuation, term sheets, VAM/repurchase, due diligence, fund ops |
+| `npl` | Distressed assets (NPL) full stack — Valuation, 30 disposal techniques, due diligence, bid ceiling back-calculation |
+| `company-law` | Company law & governance — Equity/control design, board operations, articles clause library, 2024 Company Law |
+| `ai-fingerprint-desensitizer` | AI fingerprint desensitizer — 5-dimension AI-detection scoring, layered rewriting playbook, closed-loop re-check |
 
 ## Install
 
