@@ -39,8 +39,6 @@ MIT
 
 ## Channels
 
-- Tencent SkillHub: published as free skills
 - Tencent SkillHub: https://skillhub.cn (search "九品锦锂e")
 - ModelScope (Alibaba): https://modelscope.cn/profile/ly5419495
-- ClawHub: coming soon
 - ClawHub: coming soon
