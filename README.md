@@ -21,6 +21,7 @@ OpenClaw / ClawHub, and other SKILL.md-compatible agents.
 | `cn-pdf-report-typeset` | Typesets Chinese reports (Word to PDF) with report-grade layout |
 | `financial-statement-adjustment` | Adjusts and cross-checks the three financial statements |
 | `investment-finance` | Investment & financing playbook — Valuation, term sheets, VAM/repurchase, due diligence, fund ops |
+| `funding-fit-diagnosis` | **融资参谋** — Fit diagnosis for founders & small businesses raising money: dual-track scoring (market VC vs. government guidance funds, scored independently) + a named shortlist matched from 23 VC/CVC and 15 government-fund cards (why you / what you lack / how to submit) + gap list + three-route roadmap, plus a zero-dependency offline scoring engine. Keywords: 融资 / 找投资 / 风险投资 / 政府引导基金 / 项目申报 / 商业计划书 / BP / 估值 / TS 条款 |
 | `npl` | Distressed assets (NPL) full stack — Valuation, 30 disposal techniques, due diligence, bid ceiling back-calculation |
 | `company-law` | Company law & governance — Equity/control design, board operations, articles clause library, 2024 Company Law |
 | `ai-fingerprint-desensitizer` | AI fingerprint desensitizer — 5-dimension AI-detection scoring, layered rewriting playbook, closed-loop re-check |
