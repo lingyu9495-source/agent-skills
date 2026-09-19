@@ -278,7 +278,7 @@ E.append(Paragraph("4. <b>调试修复</b>：丢报错信息，定位问题、�
 E.append(Paragraph("5. <b>自动化测试</b>：跑通测试、补测试、回归测试，一句话委托。", S_BULLET))
 
 # ---- 八、内化结论 ----
-E.append(Paragraph("八、军师内化结论（六个认知）", S_H1))
+E.append(Paragraph("八、核心结论（六个认知）", S_H1))
 E.append(Paragraph("1. <b>Agent 统一公式</b>：感知（收输入+带历史上下文）→ 大脑（LLM理解/生成）→ 行动（工具/沙箱执行），循环想→做→看。判断一个 AI 是不是真 Agent 就套这个——能自己调工具动手才算，只回话的不算。", S_BODY))
 E.append(Paragraph("2. <b>感知的核心不是\"收\"，是\"带上下文接\"</b>：只接当前输入=玩具，接住历史才值钱。这解释了多轮对话和上下文管理的价值。", S_BODY))
 E.append(Paragraph("3. <b>LLM 是大脑，工具是手脚</b>：LLM 负责想和生成，工具负责执行，缺一不可。这正是 Hermes 工具集/技能设计的内在逻辑。", S_BODY))
