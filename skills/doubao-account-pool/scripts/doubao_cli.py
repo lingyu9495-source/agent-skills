@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""doubao_cli.py — 豆包多账号池统一 CLI 入口
-子命令: doctor | status | up | down | login | check | nick | stealth | visible | ask | img | img-batch | vid | vid-regrab | fetch | trim
+"""doubao_cli.py — 豆包多实例工作台统一 CLI 入口
+子命令: doctor | status | up | down | login | check | nick | selfcheck | visible | ask | img | img-batch | vid | vid-regrab | fetch | trim
 Python 3.9+ 兼容，中文注释，UTF-8。
 """
 import argparse
@@ -21,7 +21,7 @@ from doubao_core import (
 
 SUBCOMMANDS = [
     'doctor', 'status', 'up', 'down', 'login', 'check', 'nick',
-    'stealth', 'visible', 'ask', 'img', 'img-batch', 'vid',
+    'selfcheck', 'visible', 'ask', 'img', 'img-batch', 'vid',
     'vid-regrab', 'fetch', 'trim',
 ]
 
@@ -36,7 +36,7 @@ def _lazy_import(module_name: str):
 
 
 def cmd_doctor(args):
-    """诊断环境：浏览器/ffmpeg/状态目录/依赖版本/号位。"""
+    """诊断环境：浏览器/ffmpeg/状态目录/依赖版本/实例。"""
     c = cfg()
     chrome = find_chrome()
     ffmpeg = find_ffmpeg()
@@ -55,7 +55,7 @@ def cmd_doctor(args):
         except ImportError:
             print(f'@@DEP {pkg} MISSING')
 
-    # 号位状态
+    # 实例状态
     for n in range(1, c['max_slot'] + 1):
         udd = udd_of(n)
         pf = pidfile(n)
@@ -72,7 +72,7 @@ def cmd_doctor(args):
 
 
 def cmd_status(args):
-    """显示所有号位状态。"""
+    """显示所有实例状态。"""
     deep = getattr(args, 'deep', False)
     for item in status(deep=deep):
         logged_str = 'unknown'
@@ -85,7 +85,7 @@ def cmd_status(args):
 
 
 def cmd_up(args):
-    """启动号位浏览器。"""
+    """启动实例浏览器。"""
     n = int(args.slot)
     if alive(n):
         print(f'@@UP slot={n} ALREADY ALIVE')
@@ -138,7 +138,7 @@ def cmd_up(args):
 
 
 def cmd_down(args):
-    """关闭号位浏览器。"""
+    """关闭实例浏览器。"""
     n = int(args.slot)
     killed = down(n)
     print(f'@@DOWN slot={n} killed={killed}')
@@ -188,11 +188,11 @@ def cmd_nick(args):
         print(f'@@NICK slot={n} NONE')
 
 
-def cmd_stealth(args):
-    """反检测体检。"""
+def cmd_selfcheck(args):
+    """环境一致性自检。"""
     n = int(args.slot)
     if not alive(n):
-        print(f'@@STEALTH slot={n} ALIVE=NO')
+        print(f'@@SELFCHECK slot={n} ALIVE=NO')
         return
     try:
         s = S(port_of(n))
@@ -217,9 +217,9 @@ def cmd_stealth(args):
         s.close()
         data = json.loads(r)
         for k, v in data.items():
-            print(f'@@STEALTH slot={n} {k}={v}')
+            print(f'@@SELFCHECK slot={n} {k}={v}')
     except Exception as e:
-        print(f'@@STEALTH slot={n} ERR {str(e)[:120]}')
+        print(f'@@SELFCHECK slot={n} ERR {str(e)[:120]}')
 
 
 def cmd_visible(args):
@@ -308,7 +308,7 @@ def _delegate(subcmd, module_name, rest):
 
 
 def cmd_trim(args):
-    """trim --slot N [--keep K]：关掉该号位多余的标签页，只留 K 个（默认 1）。"""
+    """trim --slot N [--keep K]：关掉该实例多余的标签页，只留 K 个（默认 1）。"""
     n = int(args.slot)
     keep = int(getattr(args, 'keep', 1) or 1)
     if keep < 1:
@@ -355,7 +355,7 @@ def main():
         return
     parser = argparse.ArgumentParser(
         prog='doubao_cli',
-        description='豆包多账号池 CLI — 配置驱动、可移植',
+        description='豆包多实例工作台 CLI — 配置驱动、可移植',
     )
     sub = parser.add_subparsers(dest='command', help='可用子命令')
 
@@ -363,41 +363,41 @@ def main():
     sub.add_parser('doctor', help='诊断环境')
 
     # status
-    p_status = sub.add_parser('status', help='号位状态')
+    p_status = sub.add_parser('status', help='实例状态')
     p_status.add_argument('--deep', action='store_true', help='深度检查（含登录态）')
 
     # up
-    p_up = sub.add_parser('up', help='启动号位')
-    p_up.add_argument('slot', help='号位编号')
+    p_up = sub.add_parser('up', help='启动实例')
+    p_up.add_argument('slot', help='实例编号')
 
     # down
-    p_down = sub.add_parser('down', help='关闭号位')
-    p_down.add_argument('slot', help='号位编号')
+    p_down = sub.add_parser('down', help='关闭实例')
+    p_down.add_argument('slot', help='实例编号')
 
     # login
     p_login = sub.add_parser('login', help='扫码登录')
-    p_login.add_argument('slot', help='号位编号')
+    p_login.add_argument('slot', help='实例编号')
     p_login.add_argument('--out', help='二维码输出路径')
 
     # check
     p_check = sub.add_parser('check', help='检查登录态')
-    p_check.add_argument('slot', help='号位编号')
+    p_check.add_argument('slot', help='实例编号')
 
     # nick
     p_nick = sub.add_parser('nick', help='读昵称')
-    p_nick.add_argument('slot', help='号位编号')
+    p_nick.add_argument('slot', help='实例编号')
 
-    # stealth
-    p_stealth = sub.add_parser('stealth', help='反检测体检')
-    p_stealth.add_argument('slot', help='号位编号')
+    # selfcheck
+    p_selfcheck = sub.add_parser('selfcheck', help='环境一致性自检')
+    p_selfcheck.add_argument('slot', help='实例编号')
 
     # visible
     p_visible = sub.add_parser('visible', help='修复可见性')
-    p_visible.add_argument('slot', help='号位编号')
+    p_visible.add_argument('slot', help='实例编号')
 
     # ask
     p_ask = sub.add_parser('ask', help='发消息')
-    p_ask.add_argument('slot', help='号位编号')
+    p_ask.add_argument('slot', help='实例编号')
     p_ask.add_argument('message', help='消息内容')
 
     # 惰性模块：参数由各自模块定义，main() 里原样转发（见 _delegate / DELEGATE）
@@ -407,7 +407,7 @@ def main():
     sub.add_parser('vid-regrab', help='视频重抓（参数见：doubao_cli.py vid-regrab --help）')
     sub.add_parser('fetch', help='数据抓取（参数见：doubao_cli.py fetch --help）')
     p_trim = sub.add_parser('trim', help='关掉多余标签页')
-    p_trim.add_argument('slot', help='号位编号')
+    p_trim.add_argument('slot', help='实例编号')
     p_trim.add_argument('--keep', type=int, default=1, help='保留的标签页数（默认 1）')
 
     args = parser.parse_args()
@@ -424,7 +424,7 @@ def main():
         'login': cmd_login,
         'check': cmd_check,
         'nick': cmd_nick,
-        'stealth': cmd_stealth,
+        'selfcheck': cmd_selfcheck,
         'visible': cmd_visible,
         'ask': cmd_ask,
         'trim': cmd_trim,

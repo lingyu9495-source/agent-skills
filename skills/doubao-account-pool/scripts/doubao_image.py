@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""豆包多账号池 —— 出图 + 高清下载（可移植版）。
+"""豆包多实例工作台 —— 出图 + 高清下载（可移植版）。
 
 子命令:
   img        单张出图 + 高清下载（新对话、基线闸、自动落盘）
-  img-batch  批量出图（多号位并发错峰 + MD5 去重）
+  img-batch  批量出图（多实例并发错峰 + MD5 去重）
 
 用法:
   python doubao_image.py img --slot 1 --file prompt.txt --out ./output
@@ -12,7 +12,7 @@
 核心机制:
   1. 每张图必须在全新对话中投喂（继承上文 = 串味 = 批量废图头号原因）
   2. 基线闸：投喂前记录 rc_gen_image 数量，投喂后只接受数量增长的新图
-  3. 批量并发错峰：workers=3，起跑间隔 0.4s 防风控
+  3. 批量并发错峰：workers=3，起跑间隔 0.4s 防稳定性保护
   4. 内置 MD5 去重：不同文件名 md5 相同 = 抓到同一张，标不可信
 
 输出: 只打印 @@ 开头的结构化短行，绝不回流页面文本/DOM/base64。
@@ -72,12 +72,12 @@ def _find_chrome():
 
 
 def _udd_of(n):
-    """号位 n 的浏览器 profile（User Data Dir）绝对路径。"""
+    """实例 n 的浏览器 profile（User Data Dir）绝对路径。"""
     return os.path.join(DOUBAO_HOME, "doubao_p%d" % n)
 
 
 def _pid_file(n):
-    """号位 n 的 PID 文件路径。"""
+    """实例 n 的 PID 文件路径。"""
     return os.path.join(_SLOT_PID_DIR, "slot%d.pid" % n)
 
 
@@ -92,7 +92,7 @@ def _is_alive(port, timeout=1.5):
 
 
 def _ensure_browser(slot):
-    """确保号位浏览器存活。不存活则启动。"""
+    """确保实例浏览器存活。不存活则启动。"""
     port = port_of(slot)
     if _is_alive(port):
         return
@@ -598,7 +598,7 @@ def _batch_worker(item, delay, out_dir, results, lock):
 def cmd_img_batch(args):
     """批量出图：
     spec.json 每行一条 {"id":"镜01","slot":1,"prompt":"..."} 或 {"id":"镜01","slot":1,"file":"词.txt"}
-    多号位并行 workers=3，起跑间隔 0.4s 错峰防风控。
+    多实例并行 workers=3，起跑间隔 0.4s 错峰防稳定性保护。
     结果写 result.json。
     """
     spec_file = args.spec
@@ -680,21 +680,21 @@ def cmd_img_batch(args):
 def main():
     parser = argparse.ArgumentParser(
         prog="doubao_image",
-        description="豆包多账号池 —— 出图 + 高清下载（可移植版）",
+        description="豆包多实例工作台 —— 出图 + 高清下载（可移植版）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 子命令:
   img        单张出图 + 高清下载（新对话、基线闸、自动落盘）
-  img-batch  批量出图（多号位并发错峰 + MD5 去重）
+  img-batch  批量出图（多实例并发错峰 + MD5 去重）
 
 核心机制:
   1. 每张图必须在全新对话中投喂（继承上文 = 串味 = 批量废图头号原因）
   2. 基线闸：投喂前记录 rc_gen_image 数量，投喂后只接受数量增长的新图
-  3. 批量并发错峰：workers=3，起跑间隔 0.4s 防风控
+  3. 批量并发错峰：workers=3，起跑间隔 0.4s 防稳定性保护
   4. 内置 MD5 去重：不同文件名 md5 相同 = 抓到同一张，标不可信
 
 环境变量:
-  DOUBAO_HOME    状态根目录（含号位 Chrome profile 等）
+  DOUBAO_HOME    状态根目录（含实例 Chrome profile 等）
   DOUBAO_OUTDIR  默认产出目录
   DOUBAO_CHROME  Chrome/Edge 可执行文件路径
 
@@ -705,15 +705,15 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_img = sub.add_parser("img", help="单张出图 + 高清下载")
-    p_img.add_argument("--slot", type=int, required=True, help="号位编号（1-N）")
+    p_img.add_argument("--slot", type=int, required=True, help="实例编号（1-N）")
     p_img.add_argument("--file", type=str, required=True, help="提示词文件路径")
     p_img.add_argument("--out", type=str, default=".", help="输出目录（默认当前目录）")
 
-    p_batch = sub.add_parser("img-batch", help="批量出图（多号位并发错峰）")
+    p_batch = sub.add_parser("img-batch", help="批量出图（多实例并发错峰）")
     p_batch.add_argument("--spec", type=str, required=True, help="任务规格 JSON 文件")
     p_batch.add_argument("--out", type=str, default=".", help="输出目录（默认当前目录）")
     p_batch.add_argument("--workers", type=int, default=3, help="并发 worker 数（默认 3）")
-    p_batch.add_argument("--stagger", type=float, default=0.4, help="起跑间隔秒数（默认 0.4，防风控）")
+    p_batch.add_argument("--stagger", type=float, default=0.4, help="起跑间隔秒数（默认 0.4，防稳定性保护）")
 
     args = parser.parse_args()
     if args.command == "img":

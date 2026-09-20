@@ -198,7 +198,7 @@ def check(n: int) -> str:
 
 
 def read_nick(n: int) -> str | None:
-    """读取号位昵称。"""
+    """读取实例昵称。"""
     from doubao_core import alive
     if not alive(n):
         return None

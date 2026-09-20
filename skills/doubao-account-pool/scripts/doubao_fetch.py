@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""豆包多账号池 —— 取件链路（浏览器重启后从会话首页找回生成结果）。
+"""豆包多实例工作台 —— 取件链路（浏览器重启后从会话首页找回生成结果）。
 
 子命令:
   fetch   打开最近会话 → 真点击打开 → 滚动到底 → DOM 抓图/视频 URL → 高清下载
@@ -67,12 +67,12 @@ def _find_chrome():
 
 
 def _udd_of(n):
-    """号位 n 的浏览器 profile（User Data Dir）绝对路径。"""
+    """实例 n 的浏览器 profile（User Data Dir）绝对路径。"""
     return os.path.join(DOUBAO_HOME, "doubao_p%d" % n)
 
 
 def _pid_file(n):
-    """号位 n 的 PID 文件路径。"""
+    """实例 n 的 PID 文件路径。"""
     return os.path.join(_SLOT_PID_DIR, "slot%d.pid" % n)
 
 
@@ -87,7 +87,7 @@ def _is_alive(port, timeout=1.5):
 
 
 def _ensure_browser(slot):
-    """确保号位浏览器存活。不存活则启动。"""
+    """确保实例浏览器存活。不存活则启动。"""
     port = port_of(slot)
     if _is_alive(port):
         return
@@ -354,7 +354,7 @@ def cmd_fetch(args):
 def main():
     parser = argparse.ArgumentParser(
         prog="doubao_fetch",
-        description="豆包多账号池 —— 取件链路（从会话首页找回生成结果）",
+        description="豆包多实例工作台 —— 取件链路（从会话首页找回生成结果）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 子命令:
@@ -366,7 +366,7 @@ def main():
   JS 合成 click 对豆包 SPA 无效。
 
 环境变量:
-  DOUBAO_HOME   状态根目录（含号位 Chrome profile 等）
+  DOUBAO_HOME   状态根目录（含实例 Chrome profile 等）
   DOUBAO_OUTDIR 默认产出目录
 
 示例:
@@ -376,7 +376,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_fetch = sub.add_parser("fetch", help="打开最近会话 → 抓图/视频 → 高清下载")
-    p_fetch.add_argument("--slot", type=int, required=True, help="号位编号（1-N）")
+    p_fetch.add_argument("--slot", type=int, required=True, help="实例编号（1-N）")
     p_fetch.add_argument("--out", type=str, default=".", help="输出目录（默认当前目录）")
 
     args = parser.parse_args()

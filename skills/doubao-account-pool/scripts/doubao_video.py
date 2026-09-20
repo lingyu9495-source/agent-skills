@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""豆包视频生成可移植模块 —— 十二步固定链路 + 重抓 + 付费闸门
+"""豆包视频生成可移植模块 —— 十二步固定链路 + 重抓 + 防误购保护
 
 依赖: doubao_core (冻结 API：S, port_of, cfg, find_ffmpeg, log)
 用法:
@@ -28,17 +28,17 @@ MIN_DOWNLOAD_BYTES = 80000   # 下载最低字节数（< 80KB 视为失败）
 
 # ── 付费关键词（出现任一即中止，绝不确认扣款） ──
 PAID_KEYWORDS = [
-    "消耗付费额度", "付费额度", "消耗积分", "订阅", "专业版",
+    "消耗付费用量", "付费用量", "消耗积分", "订阅", "专业版",
     "升级会员", "开通会员", "升级", "开通", "付费", "积分",
 ]
-# ── 额度耗尽关键词 ──
+# ── 用量耗尽关键词 ──
 OUT_KEYWORDS = [
-    "免费次数用完", "明天再来", "次数已用完", "额度不足",
+    "免费次数用完", "明天再来", "次数已用完", "用量不足",
     "免费次数已用完",
 ]
-# ── 免费额度关键词 ──
+# ── 基础用量关键词 ──
 FREE_KEYWORDS = [
-    "消耗每日免费额度", "消耗免费额度", "免费额度",
+    "消耗每日基础用量", "消耗基础用量", "基础用量",
 ]
 
 
@@ -93,7 +93,7 @@ TAIL_JS = r"""(() => (document.body.innerText || '').slice(-1600))()"""
 # 确认卡检测（含所有关键词）
 CARD_JS = r"""(() => {
   const t = document.body.innerText || '';
-  const keys = ['确认，开始生成','开始生成','消耗','付费','额度','积分',
+  const keys = ['确认，开始生成','开始生成','消耗','付费','用量','积分',
                 '次数','订阅','专业版','升级会员','开通会员'];
   const hit = keys.filter(k => t.indexOf(k) >= 0);
   return JSON.stringify({hit: hit, tail: t.slice(-1400)});
@@ -168,7 +168,7 @@ def _check_paid_abort(slot, s, stage=""):
         print("@@PAID_ABORT slot=%s stage=%s 付费关键词命中，已中止" % (slot, stage), flush=True)
         return True
     if verdict == "out":
-        print("@@OUT_ABORT slot=%s stage=%s 免费额度已用完，已中止" % (slot, stage), flush=True)
+        print("@@OUT_ABORT slot=%s stage=%s 基础用量已用完，已中止" % (slot, stage), flush=True)
         return True
     return False
 
@@ -246,7 +246,7 @@ def _wait_card(slot, s):
             print("@@PAID_ABORT slot=%s 确认卡含付费字样，已中止" % slot, flush=True)
             return None
         if verdict == "out":
-            print("@@OUT_ABORT slot=%s 确认卡含额度耗尽，已中止" % slot, flush=True)
+            print("@@OUT_ABORT slot=%s 确认卡含用量耗尽，已中止" % slot, flush=True)
             return None
         if "确认，开始生成" in tail or "开始生成" in tail:
             print("@@STEP6 slot=%s 确认卡命中 %s" % (slot, json.dumps(hits, ensure_ascii=False)), flush=True)
@@ -257,20 +257,20 @@ def _wait_card(slot, s):
 
 
 def _pay_gate(slot, s, card_tail):
-    """⑦ 付费闸门 —— 本模块第一优先级
-    确认卡/弹层出现「专业版/订阅/付费额度/升级/开通会员」任一关键词
-    → 立即中止该号位并回 @@PAID_ABORT
+    """⑦ 防误购保护 —— 本模块第一优先级
+    确认卡/弹层出现「专业版/订阅/付费用量/升级/开通会员」任一关键词
+    → 立即中止该实例并回 @@PAID_ABORT
     绝不点击任何升级按钮、绝不确认扣款
-    免费额度正常时回 @@SAFE free
+    基础用量正常时回 @@SAFE free
     """
     verdict = _paycheck(card_tail or "")
     if verdict == "paid":
-        print("@@PAID_ABORT slot=%s 付费闸门拦截（未确认扣款）" % slot, flush=True)
+        print("@@PAID_ABORT slot=%s 防误购保护拦截（未确认扣款）" % slot, flush=True)
         return False
     if verdict == "out":
-        print("@@OUT_ABORT slot=%s 免费额度已用完" % slot, flush=True)
+        print("@@OUT_ABORT slot=%s 基础用量已用完" % slot, flush=True)
         return False
-    print("@@SAFE free slot=%s 免费额度正常" % slot, flush=True)
+    print("@@SAFE free slot=%s 基础用量正常" % slot, flush=True)
     return True
 
 
@@ -308,7 +308,7 @@ def _wait_generation(slot, s):
             print("@@PAID_ABORT slot=%s 生成过程中出现付费提示" % slot, flush=True)
             return "paid"
         if verdict == "out":
-            print("@@OUT_ABORT slot=%s 生成过程中额度耗尽" % slot, flush=True)
+            print("@@OUT_ABORT slot=%s 生成过程中用量耗尽" % slot, flush=True)
             return "out"
         if "你的视频生成好了" in tail:
             print("@@STEP9 slot=%s 生成完成 (%ds, %d次轮询)" % (
@@ -318,7 +318,7 @@ def _wait_generation(slot, s):
             print("@@REJECT slot=%s 生成失败/违规" % slot, flush=True)
             return "reject"
     # 超时：可能是静默拒答（零回复、不出确认卡、不报错）
-    print("@@NOCARD slot=%s 等待生成超时（可能静默拒答/额度耗尽）" % slot, flush=True)
+    print("@@NOCARD slot=%s 等待生成超时（可能静默拒答/用量耗尽）" % slot, flush=True)
     return "timeout"
 
 
@@ -447,7 +447,7 @@ def _probe_spec(out_path):
 
 def cmd_vid(args):
     """vid --slot N --image 垫图.png --file 词.txt --out DIR [--name 名]
-    十二步固定链路：探活→切模式→上传→注入→发送→读卡→付费闸门→确认→等完成→抓链→下载→核对
+    十二步固定链路：探活→切模式→上传→注入→发送→读卡→防误购保护→确认→等完成→抓链→下载→核对
     """
     # 解析参数
     slot = None
@@ -492,7 +492,7 @@ def cmd_vid(args):
         with open(pf, encoding="utf-8") as f:
             prompt_text = f.read().strip()
 
-    # ── 认领锁（避免多号位撞同一镜白烧额度） ──
+    # ── 认领锁（避免多实例撞同一镜白烧用量） ──
     lock_path = out_path + ".lock"
     if os.path.exists(lock_path):
         try:
@@ -552,7 +552,7 @@ def cmd_vid(args):
         if card_tail is None:  # PAID_ABORT 已打印
             return
 
-        # ⑦ 付费闸门（本模块第一优先级）
+        # ⑦ 防误购保护（本模块第一优先级）
         if not _pay_gate(slot, s, card_tail):
             return  # @@PAID_ABORT 已打印
 
@@ -601,7 +601,7 @@ def cmd_vid(args):
 
 def cmd_regrab(args):
     """vid-regrab --slot N --out DIR [--name 名]
-    已生成但没抓到链的重抓，绝不许重跑生成（白烧额度）
+    已生成但没抓到链的重抓，绝不许重跑生成（白烧用量）
     """
     slot = None
     out_dir = None
@@ -670,12 +670,12 @@ USAGE = """用法:
 
 十二步固定链路:
   ①探活 ②切视频生成模式 ③上传垫图 ④注入提示词 ⑤发送
-  ⑥读确认卡 ⑦付费闸门 ⑧确认生成 ⑨等完成 ⑩抓视频链 ⑪下载 ⑫规格核对(必须有音轨)
+  ⑥读确认卡 ⑦防误购保护 ⑧确认生成 ⑨等完成 ⑩抓视频链 ⑪下载 ⑫规格核对(必须有音轨)
 
-付费闸门: 确认卡/弹层出现「专业版/订阅/付费额度/升级/开通会员」任一关键词
+防误购保护: 确认卡/弹层出现「专业版/订阅/付费用量/升级/开通会员」任一关键词
           → 立即中止 @@PAID_ABORT，绝不点击升级按钮、绝不确认扣款
 静默拒答: 提示词正常发出、豆包零回复、不出确认卡、不报错 → @@NOCARD
-重抓: vid-regrab 只抓链+下载，绝不重跑生成（白烧额度）
+重抓: vid-regrab 只抓链+下载，绝不重跑生成（白烧用量）
 """
 
 def main():

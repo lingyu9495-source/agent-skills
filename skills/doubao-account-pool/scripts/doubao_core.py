@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""豆包号位底座（冻结 API）—— 真正实现，零 stub。
+"""豆包实例底座（冻结 API）—— 真正实现，零 stub。
 
-统一底座：配置解析 + CDP 会话 + 号位生命周期，供其余模块调用。
+统一底座：配置解析 + CDP 会话 + 实例生命周期，供其余模块调用。
 Python 3.9+，仅标准库 + websocket-client，UTF-8，中文注释。
 
 冻结签名:
@@ -31,7 +31,7 @@ SITE = 'https://www.doubao.com/chat/'
 
 # 内置默认配置
 _DEFAULTS = {
-    'home': os.path.expanduser('~/.doubao_pool'),
+    'home': os.path.expanduser('~/.doubao_studio'),
     'out_dir': '',
     'port_base': 9230,
     'max_slot': 20,
@@ -141,7 +141,7 @@ def _reset_cfg():
 
 
 # 兼容模块级常量导出（doubao_fetch / doubao_image 的 import 需要）
-DOUBAO_HOME = os.environ.get('DOUBAO_HOME', os.path.expanduser('~/.doubao_pool'))
+DOUBAO_HOME = os.environ.get('DOUBAO_HOME', os.path.expanduser('~/.doubao_studio'))
 DOUBAO_OUTDIR = os.environ.get('DOUBAO_OUTDIR', os.path.join(DOUBAO_HOME, 'out'))
 
 
@@ -161,17 +161,17 @@ def out_dir():
 
 
 def port_of(n):
-    """号位 n → CDP 调试端口。"""
+    """实例 n → CDP 调试端口。"""
     return cfg()['port_base'] + int(n)
 
 
 def udd_of(n):
-    """号位 n → user-data-dir 路径。"""
+    """实例 n → user-data-dir 路径。"""
     return os.path.join(home(), 'doubao_p%d' % int(n))
 
 
 def pidfile(n):
-    """号位 n → pidfile 路径。"""
+    """实例 n → pidfile 路径。"""
     return os.path.join(udd_of(n), '.slot_pid')
 
 
@@ -203,7 +203,7 @@ def http(port, path, method='GET', timeout=15):
 # 进程检测与管理
 # ════════════════════════════════════════════════════════════════
 def alive(n, timeout=1.5):
-    """号位 n 的 Chrome 是否在线（通过 /json/version 探活）。"""
+    """实例 n 的 Chrome 是否在线（通过 /json/version 探活）。"""
     try:
         urllib.request.urlopen(
             'http://127.0.0.1:%d/json/version' % port_of(n),
@@ -215,7 +215,7 @@ def alive(n, timeout=1.5):
 
 
 def up(n, quiet=False):
-    """启动号位 n 的 Chrome 浏览器。返回 True/False。"""
+    """启动实例 n 的 Chrome 浏览器。返回 True/False。"""
     n = int(n)
     if alive(n):
         if not quiet:
@@ -297,7 +297,7 @@ def up(n, quiet=False):
 
 
 def up_all(quiet=False):
-    """批量启动所有号位。返回 {slot: bool}。"""
+    """批量启动所有实例。返回 {slot: bool}。"""
     c = cfg()
     results = {}
     for n in range(1, c['max_slot'] + 1):
@@ -381,10 +381,10 @@ def find_ffmpeg(name='ffmpeg'):
 
 
 # ════════════════════════════════════════════════════════════════
-# 安全关闭（只杀本号位进程树）
+# 安全关闭（只杀本实例进程树）
 # ════════════════════════════════════════════════════════════════
 def _taskkill_tree_win(pid, udd_lower):
-    """Windows：校验命令行含本号位目录后才 taskkill /PID <pid> /T /F。返回 0 或 1。"""
+    """Windows：校验命令行含本实例目录后才 taskkill /PID <pid> /T /F。返回 0 或 1。"""
     try:
         ps_cmd = (
             "$p = Get-CimInstance Win32_Process -Filter \"ProcessId=%d\"; "
@@ -408,7 +408,7 @@ def _taskkill_tree_win(pid, udd_lower):
 
 
 def _kill_by_cmdline_unix(udd_path):
-    """POSIX：按命令行含本号位目录匹配后 kill。返回被杀进程数。"""
+    """POSIX：按命令行含本实例目录匹配后 kill。返回被杀进程数。"""
     killed = 0
     try:
         out = subprocess.run(
@@ -431,7 +431,7 @@ def _kill_by_cmdline_unix(udd_path):
 
 
 def _kill_by_cmdline_win(udd_lower):
-    """Windows：用 PowerShell 按命令行精确匹配 chrome.exe 本号位进程。返回被杀进程数。"""
+    """Windows：用 PowerShell 按命令行精确匹配 chrome.exe 本实例进程。返回被杀进程数。"""
     killed = 0
     try:
         ps_cmd = (
@@ -458,7 +458,7 @@ def _kill_by_cmdline_win(udd_lower):
 
 
 def down(n):
-    """只杀本号位 Chrome 进程树。返回被杀进程数。绝不碰用户的浏览器。"""
+    """只杀本实例 Chrome 进程树。返回被杀进程数。绝不碰用户的浏览器。"""
     n = int(n)
     udd_lower = udd_of(n).lower()
     killed = 0
@@ -496,7 +496,7 @@ def down(n):
 # 状态
 # ════════════════════════════════════════════════════════════════
 def status(deep=False):
-    """返回所有号位状态列表。兼容 status(deep=True) 和 status(True)。"""
+    """返回所有实例状态列表。兼容 status(deep=True) 和 status(True)。"""
     c = cfg()
     result = []
     for n in range(1, c['max_slot'] + 1):
@@ -598,7 +598,7 @@ _NICK_JS = r"""(() => {
 
 
 def nick(n):
-    """读取号位昵称。返回昵称字符串或 None。"""
+    """读取实例昵称。返回昵称字符串或 None。"""
     n = int(n)
     if not alive(n):
         return None

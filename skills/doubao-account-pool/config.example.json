@@ -1,6 +1,6 @@
 {
-  "_comment": "豆包多账号池配置 — 复制为 doubao_config.json 后按需修改",
-  "doubao_home": "~/.doubao_pool",
+  "_comment": "豆包多实例工作台配置 — 复制为 doubao_config.json 后按需修改",
+  "doubao_home": "~/.doubao_studio",
   "chrome_path": "",
   "ffmpeg_path": "",
   "out_dir": "",
