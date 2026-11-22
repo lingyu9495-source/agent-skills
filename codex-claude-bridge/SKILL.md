@@ -118,7 +118,45 @@ bash ~/.codex-claude-bridge/app/scripts/smoke-test.sh
 写清 **改哪里 / 改成什么 / 不许做什么 / 完成后怎么自证**。
 模型不是 Claude 本人时更吃这一套——指令越像工单，越不容易跑偏。
 
-## 三、权限：默认只读，写文件要显式提
+## 三、稳不稳，靠工单执行器兜底（`ccjob`）
+
+先说清一件事，免得被宣传话术骗：**`claude -p` 没有内建回滚。**
+`claude --help` 里没有 checkpoint / rewind 开关，无头模式下也用不了 `/rewind` 这类交互斜杠命令；
+它也**不校验 YAML / JSON 语法**，改出格式错它自己不知道。
+所以「改坏了一键恢复」「格式错了客户端就拦住」这两句在脚本调用场景里不成立——得自己补。
+
+`scripts/ccjob.sh` 就是补这一层：
+
+```bash
+cp scripts/ccjob.sh /usr/local/bin/ccjob && chmod +x /usr/local/bin/ccjob
+```
+
+一单的完整动作：
+
+```
+tar 备份 → md5 指纹 → 锁目录限权执行 → 重算指纹 → 打印真 diff → 留痕可回滚
+```
+
+```bash
+ccjob --dir /path/to/project --job "只改 config.yaml 的 model 为 xxx，别动其他文件"
+ccjob --dir /path --job-file task.md --tools "Read,Edit,Bash(ls *),Bash(cat *)"
+ccjob --list                     # 看历史工单
+ccjob --rollback <run_id>        # 一键回到那一单执行前
+```
+
+几条硬规矩：
+
+- **工单必须自带全部信息**。每一单是独立上下文，它看不见你这边聊过什么、
+  也不知道客户的背景。工单里写清：改哪个文件、改成什么、不许做什么、做完怎么自证。
+- **验收看磁盘，不看它自述**。`ccjob` 会重算 md5 并打 diff；它说「已改好」而文件没变，
+  就当没改。
+- **一个文件都没变，等于没执行**，不要当成功。
+
+实测（Ubuntu / DeepSeek `deepseek-flash`）：改一行 YAML 约 4.6–5.0 秒、4 轮工具调用、
+单次输入约 1.3 万 token（Claude Code 的系统提示词与工具定义占大头）。
+意味着：**单次成本不高，但不要拿它跑一句话就能问完的活**，那些留在主脑里答。
+
+## 四、权限：默认只读，写文件要显式提
 
 | 层级 | Claude Code | Codex |
 |---|---|---|

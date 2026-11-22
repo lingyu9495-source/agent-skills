@@ -74,6 +74,22 @@ CODEX_SANDBOX=workspace-write      bash .../ask-codex.sh "..." "/repo"
 
 `bypassPermissions` / `danger-full-access` 风险极高，必须客户明确同意。
 
+## 工单执行器：备份 + 真 diff + 可回滚
+
+`claude -p` 没有内建 checkpoint/rewind，也不校验 YAML/JSON 语法。
+回滚与验收要靠 `scripts/ccjob.sh`：
+
+```bash
+cp scripts/ccjob.sh /usr/local/bin/ccjob && chmod +x /usr/local/bin/ccjob
+
+ccjob --dir /repo --job "只改 config.yaml 的 model 为 xxx，别动其他文件"
+ccjob --list                    # 历史工单
+ccjob --rollback <run_id>       # 回到那一单执行前
+```
+
+每单一律：tar 备份 → md5 指纹 → 锁目录限权执行 → 重算指纹 → 打印真实 diff → 留痕。
+**验收看磁盘，不看模型自述；一个文件都没变就等于没执行。**
+
 ## 智能体接入
 
 | 宿主 | 接法 |
