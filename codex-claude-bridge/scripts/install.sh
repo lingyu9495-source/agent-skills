@@ -225,7 +225,7 @@ APP="$BRIDGE_HOME/app"
 if [ "$PKG_DIR" != "$APP" ]; then
   mkdir -p "$APP"
   cp -R "$PKG_DIR/scripts" "$PKG_DIR/mcp" "$PKG_DIR/templates" "$APP/"
-  for f in SKILL.md AGENTS.md README.md VERSION.txt LICENSE.md NOTICE.md; do
+  for f in SKILL.md AGENTS.md README.md VERSION LICENSE NOTICE; do
     [ -f "$PKG_DIR/$f" ] && cp "$PKG_DIR/$f" "$APP/"
   done
 fi
