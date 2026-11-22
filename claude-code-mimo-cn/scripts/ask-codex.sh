@@ -16,7 +16,8 @@ TMP=$(mktemp "${TMPDIR:-/tmp}/codex-bridge.XXXXXX")
 trap 'rm -f "$TMP"' EXIT
 cd "$CWD"
 "$CODEX_BIN" exec --json --skip-git-repo-check -s "${CODEX_SANDBOX:-read-only}" -C "$CWD" "$PROMPT" >"$TMP" 2>/dev/null || true
-python3 - "$TMP" <<'PY'
+if command -v python3 >/dev/null 2>&1; then
+  python3 - "$TMP" <<'PY'
 import json, sys
 last=None
 raw=[]
@@ -28,3 +29,13 @@ for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
         last=e['item'].get('text')
 print(last if last is not None else ''.join(raw)[-4000:])
 PY
+elif command -v node >/dev/null 2>&1; then
+  node - "$TMP" <<'JS'
+const fs=require('fs');const lines=fs.readFileSync(process.argv[2],'utf8').split('\n');let last=null;
+for(const l of lines){if(!l.trim())continue;try{const e=JSON.parse(l);
+if(e.type==='item.completed'&&e.item&&e.item.type==='agent_message')last=e.item.text;}catch(e){}}
+process.stdout.write(last!==null?last:lines.join('\n').slice(-4000));
+JS
+else
+  tail -c 4000 "$TMP"
+fi

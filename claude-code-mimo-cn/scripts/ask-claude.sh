@@ -33,7 +33,8 @@ if [ "${CLAUDE_OUTPUT_FORMAT:-json}" = "json" ]; then
   "$CLAUDE_BIN" "${ARGS[@]}" >"$OUT" 2>"$ERR"
   rc=$?
   set -e
-  python3 - "$OUT" <<'PY'
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - "$OUT" <<'PY'
 import json, sys
 s = open(sys.argv[1], encoding="utf-8", errors="replace").read()
 i = s.find("{")
@@ -49,6 +50,15 @@ if i >= 0:
         pass
 sys.stdout.write(s)
 PY
+  elif command -v node >/dev/null 2>&1; then
+    node - "$OUT" <<'JS'
+const fs=require('fs');const s=fs.readFileSync(process.argv[2],'utf8');const i=s.indexOf('{');
+if(i>=0){const c=s.slice(i).trim();try{JSON.parse(c);process.stdout.write(c+"\n");process.exit(0);}catch(e){}}
+process.stdout.write(s);
+JS
+  else
+    cat "$OUT"
+  fi
   [ -s "$ERR" ] && cat "$ERR" >&2
   exit "$rc"
 fi

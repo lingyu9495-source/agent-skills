@@ -164,7 +164,9 @@ if [ "$INSTALL_CLAUDE" -eq 1 ] || [ "$INSTALL_CODEX" -eq 1 ]; then
 fi
 
 PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || true)}"
-[ -n "$PYTHON_BIN" ] || die "python3 is required (for JSON config and MCP server)"
+if [ -z "$PYTHON_BIN" ]; then
+  echo "WARN: python3 not found; MCP server will be skipped, CLI wrappers still work." >&2
+fi
 
 mkdir -p "$BRIDGE_HOME"
 chmod 700 "$BRIDGE_HOME"
@@ -273,23 +275,18 @@ if [ -n "$CODEX_API_KEY" ]; then
     echo "wire_api = \"$CODEX_WIRE_API\""
     echo "requires_openai_auth = true"
   } > "$CT"
-  "$PYTHON_BIN" - "$BRIDGE_HOME/codex-home/auth.json" "$CODEX_API_KEY" <<'PY'
-import json, os, sys
-path, key = sys.argv[1], sys.argv[2]
-with open(path, 'w', encoding='utf-8') as f:
-    json.dump({"auth_mode": "apikey", "OPENAI_API_KEY": key}, f)
-os.chmod(path, 0o600)
-PY
+  json_escape() { local v="$1"; v=${v//\\/\\\\}; v=${v//\"/\\\"}; printf '%s' "$v"; }
+  printf '{"auth_mode":"apikey","OPENAI_API_KEY":"%s"}\n' "$(json_escape "$CODEX_API_KEY")" > "$BRIDGE_HOME/codex-home/auth.json"
+  chmod 600 "$BRIDGE_HOME/codex-home/auth.json"
 fi
 
 # --- MCP config -------------------------------------------------------------
-"$PYTHON_BIN" - "$BRIDGE_HOME/mcp.json" "$APP/mcp/server.py" "$PYTHON_BIN" <<'PY'
-import json, sys
-path, server, python = sys.argv[1:4]
-with open(path, 'w', encoding='utf-8') as f:
-    json.dump({"mcpServers": {"codex-claude-bridge": {"command": python, "args": [server]}}}, f, indent=2)
-    f.write("\n")
-PY
+if [ -n "$PYTHON_BIN" ]; then
+  printf '{\n  "mcpServers": {\n    "codex-claude-bridge": {\n      "command": "%s",\n      "args": ["%s"]\n    }\n  }\n}\n' \
+    "$PYTHON_BIN" "$APP/mcp/server.py" > "$BRIDGE_HOME/mcp.json"
+else
+  echo "WARN: skip mcp.json (no python3); MCP clients cannot attach until python3 is installed." >&2
+fi
 
 # --- agent registration -----------------------------------------------------
 render_skill() {
