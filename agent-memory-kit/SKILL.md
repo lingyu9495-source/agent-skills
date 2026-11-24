@@ -2,7 +2,7 @@
 name: ai-memory-kit-shared
 slug: ai-memory-kit-shared
 description: 一台机器上所有智能体共用一份记忆（完整包）。豆包/WorkBuddy/Hermes/Claude Code/扣子轮流用，都往同一底座里记、都能查；含团队视图、知识点沉淀、一底座多智能体接法规约、18 个真实踩坑。
-version: 1.3.0
+version: 1.3.1
 author: 九品锦里e
 license: MIT
 metadata:
