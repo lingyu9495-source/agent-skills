@@ -6,23 +6,24 @@ each one is distilled from real projects, not written as a textbook.
 Compatible with any tool that loads Agent Skills: Claude Code, Codex CLI, Cursor,
 OpenClaw / ClawHub, and other SKILL.md-compatible agents.
 
-## Featured: Agent Memory Kit · 零依赖 AI 长期记忆底座
+## Featured: 共享记忆底座 · 一台机器上所有智能体共用一份记忆
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-C9A961.svg)](agent-memory-kit/LICENSE)
 
-框架都存得住、想不起。这个包补的只有两件事：**自动记**、**主动想**。
+今天用豆包、明天 WorkBuddy、后天 Hermes、再换 Claude Code —— 换个工具，记忆就归零。
+这个包做的是一件事：**一台机器上建一个记忆底座，所有智能体都往里记、也都从里面取。**
 
-只依赖 Python 标准库 + SQLite FTS5（< 30MB 内存），数据是本地明文文件，能看、能删、能带走。
-含三层记忆架构、A/B/C 三档选型、六步部署 SOP、四步验收（含"假成功"判据）、18 个真实踩坑，
-以及两个可直接装进 Claude Code / Hermes / QwenPaw 的技能。
+换工具不换记忆；团队里一个智能体踩过的坑，写成知识点后，下一个智能体开工就能看到。
+零依赖（Python 标准库 + SQLite FTS5），单文件，4G 小机器能跑。
+含跨智能体共享 SOP（一底座多智能体的接法与写入规约）、团队视图（谁记了多少）、知识点沉淀、18 个真实踩坑。
 
-→ [进入 `agent-memory-kit/`](agent-memory-kit/) ｜ [下载 zip](https://github.com/lingyu9495-source/agent-skills/releases/tag/agent-memory-kit-v1.0.0)
+→ [进入 `agent-memory-kit/`](agent-memory-kit/) ｜ [下载 v1.1.0](https://github.com/lingyu9495-source/agent-skills/releases/tag/agent-memory-kit-v1.1.0)
 
 ## Skills
 
 | Skill | What it does |
 |---|---|
-| `agent-memory-kit` | Gives any agent real long-term memory: zero-dependency local base (SQLite FTS5), 3-tier architecture, 6-step deployment, 4-step acceptance, 18 pitfalls |
+| `agent-memory-kit` | One shared memory base for every agent on the machine: Doubao / WorkBuddy / Hermes / Claude Code all read and write the same store, so switching tools no longer resets memory. Zero-dependency (SQLite FTS5), team view, knowledge points, 18 pitfalls |
 | `feasibility-report-engine` | End-to-end feasibility-study report pipeline (China NDRC 2023 outline: government 11 chapters / enterprise 10 chapters) + linked financial model worksheets |
 | `feasibility-study-consultant` | Decides whether a project is worth doing: screening questions, red flags, go / no-go |
 | `ai-image-watermark-removal-boss` | Cleans watermarks off your own and AI-generated images, then runs a pixel-level residual check |
