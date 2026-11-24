@@ -6,18 +6,20 @@ each one is distilled from real projects, not written as a textbook.
 Compatible with any tool that loads Agent Skills: Claude Code, Codex CLI, Cursor,
 OpenClaw / ClawHub, and other SKILL.md-compatible agents.
 
-## Featured: 共享记忆底座 · 所有智能体共用一个记忆（单机 / 云端一座）
+## Featured: 共享记忆底座 · 一个人的所有 AI 工具共用一个记忆（单机 / 云端一座）
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-C9A961.svg)](agent-memory-kit/LICENSE)
 
 今天用豆包、明天 WorkBuddy、后天 Hermes、再换 Claude Code —— 换个工具，记忆就归零。
-这个包做的是一件事：**建一个记忆底座，所有智能体都往里记、也都从里面取。**
+这个包做的事：**建一个记忆底座，你自己的 AI 工具都往里记、也都从里面取。**
 
-两种用法：**单机**（本包脚本，零依赖，一个目录搞定）｜**云端一座**（一台服务器常驻服务，多台设备、多个人、多个框架共用；语义检索、能记图、一人一库硬隔离）。
+两种用法：**单机**（零依赖脚本，一个目录）｜**云端一座**（一台服务器常驻服务，多台设备、多个工具、一个团队接进来；语义检索、能记图、一人一库硬隔离）。
 
-云端版是实机勘查出来的：18 个成员、约 4000 条记忆、实占内存 104MB、连续跑一周多没停；本机经隧道连云端，语义检索 score 0.86 命中。
+说准确点：**同一个人的多个工具记忆互通；不同人默认隔离，团队共识走事实层**——不是全员共用一个池子。对律所、财税这类客户，隔离本身就是卖点：客户 A 的库，客户 B 永远搜不到。
 
-→ [进入 `agent-memory-kit/`](agent-memory-kit/) ｜ [下载 v1.2.0](https://github.com/lingyu9495-source/agent-skills/releases/tag/agent-memory-kit-v1.2.0) ｜ 云端部署实录见 `docs/09`
+云端版是实机勘查出来的：18 个成员、约 4000 条记忆、实占内存 104MB、连续跑一周多没停；本机经隧道连云端语义检索 score 0.86。
+
+→ [进入 `agent-memory-kit/`](agent-memory-kit/) ｜ [下载 v1.3.0](https://github.com/lingyu9495-source/agent-skills/releases/tag/agent-memory-kit-v1.3.0) ｜ 云端交付与报价见 `docs/11`
 
 ## Skills
 
