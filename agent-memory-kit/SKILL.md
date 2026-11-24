@@ -2,7 +2,7 @@
 name: ai-memory-kit-shared
 slug: ai-memory-kit-shared
 description: 一台机器上所有智能体共用一份记忆（完整包）。豆包/WorkBuddy/Hermes/Claude Code/扣子轮流用，都往同一底座里记、都能查；含团队视图、知识点沉淀、一底座多智能体接法规约、18 个真实踩坑。
-version: 1.1.0
+version: 1.2.0
 author: 九品锦里e
 license: MIT
 metadata:
@@ -32,6 +32,7 @@ metadata:
 | `scripts/install.sh` | 一键安装 + 自检 |
 | `scripts/memory_hook.py` | 自动召回钩子示例 |
 | `docs/06-跨智能体共享SOP.md` | ★ 一底座多智能体的架构、三步接入、各工具接法、写入规约 |
+| `docs/09-云端多设备部署实录.md` | ★ 云端一座：多设备/团队共用，实机勘查结论（服务/账号/限流/网络/运维/三故障） |
 | `docs/07-技能-记忆底座部署.md` | 可整包转发给别的 AI 执行的部署技能 |
 | `docs/08-技能-记忆修剪与归档.md` | 热层修剪与归档技能 |
 | `docs/01`–`05` | 概念与判据 / 三层架构与选型 / 部署 SOP / 验收与 18 坑 / 多端架构 |
